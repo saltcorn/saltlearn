@@ -10,6 +10,8 @@ from server.config import get_db_uri
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = get_db_uri()
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
 db = SQLAlchemy(app)
 
 @app.route("/")
