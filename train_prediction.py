@@ -12,18 +12,17 @@ print(get_db_uri())
 
 engine = create_engine(get_db_uri())
 
-df = pd.read_sql_query('SELECT category, price FROM "Product" where price is not null', con=engine)
+df = pd.read_sql_query('SELECT category, price, pricep2 FROM "Product"', con=engine)
+df = df.dropna()
 df_y = df['price']
 
 
-df_cat = df[['category']]
-
-categorical_features = ['embarked', 'sex', 'pclass']
-categorical_transformer = OneHotEncoder(handle_unknown='ignore')
+df_cat = df[['category', "pricep2"]]
+#following https://scikit-learn.org/stable/auto_examples/compose/plot_column_transformer_mixed_types.html
 
 preprocessor = ColumnTransformer(
     transformers=[
-        #('num', numeric_transformer, numeric_features),
+        ('num', StandardScaler(), ['pricep2']),
         ('cat', OneHotEncoder(handle_unknown='ignore'), ['category'])])
 
 clf = Pipeline(steps=[('preprocessor', preprocessor),
@@ -34,5 +33,11 @@ clf.fit(df_cat, df_y)
 
 s=pickle.dumps(clf)
 clf2 = pickle.loads(s)
-pred=clf2.predict(pd.DataFrame.from_dict({'category': ["Clothing"]}))
+pred=clf2.predict(pd.DataFrame.from_dict({
+    'category': ["Clothing"],
+    'pricep2':[45]
+}))
 print(pred)
+
+#split into function
+#store in db
