@@ -1,5 +1,5 @@
 from server.config import get_db_uri
-
+from tasks.prediction import predict
 from sqlalchemy import create_engine
 import pickle
 import pandas as pd
@@ -12,27 +12,15 @@ print(get_db_uri())
 
 engine = create_engine(get_db_uri())
 
-df = pd.read_sql_query('SELECT category, price, pricep2 FROM "Product"', con=engine)
-df = df.dropna()
-df_y = df['price']
 
+s1=predict(
+    [{'name':'category', 'type':{"name":"String"}},
+     {'name':'pricep2', 'type':{"name":"Float"}}],
+    {'name':'price', 'type':{"name":"Float"}},
+    "Product",
+    engine)
 
-df_cat = df[['category', "pricep2"]]
-#following https://scikit-learn.org/stable/auto_examples/compose/plot_column_transformer_mixed_types.html
-
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', StandardScaler(), ['pricep2']),
-        ('cat', OneHotEncoder(handle_unknown='ignore'), ['category'])])
-
-clf = Pipeline(steps=[('preprocessor', preprocessor),
-                      ('classifier', LinearRegression())])
-
-
-clf.fit(df_cat, df_y)
-
-s=pickle.dumps(clf)
-clf2 = pickle.loads(s)
+clf2 = pickle.loads(s1)
 pred=clf2.predict(pd.DataFrame.from_dict({
     'category': ["Clothing"],
     'pricep2':[45]
