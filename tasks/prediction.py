@@ -21,7 +21,7 @@ def predict(predictors, outcome, table, engine):
             cat_preds.append(pred['name'])
     
     sql_fields.append(outcome['name'])
-    sql = 'SELECT {0} FROM "{1}"'.format(",".join(sql_fields), table)
+    sql = 'SELECT {0} FROM "{1}"'.format(",".join(sql_fields), table['name'])
     df = pd.read_sql_query(sql, con=engine)
     df = df.dropna()
     df_y = df[outcome['name']]

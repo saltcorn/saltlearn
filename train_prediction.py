@@ -1,5 +1,6 @@
 from server.config import get_db_uri
 from tasks.prediction import predict
+from dbmodels.model import models, insert_model
 from sqlalchemy import create_engine
 import pickle
 import pandas as pd
@@ -12,12 +13,14 @@ print(get_db_uri())
 
 engine = create_engine(get_db_uri())
 
+predictors=[{'name':'category', 'type':{"name":"String"}},
+     {'name':'pricep2', 'type':{"name":"Float"}}]
 
+outcome={'name':'price', 'type':{"name":"Float"}}
 s1=predict(
-    [{'name':'category', 'type':{"name":"String"}},
-     {'name':'pricep2', 'type':{"name":"Float"}}],
-    {'name':'price', 'type':{"name":"Float"}},
-    "Product",
+    predictors,
+    outcome,
+    {'name':"Product",id:29},
     engine)
 
 clf2 = pickle.loads(s1)
@@ -27,5 +30,7 @@ pred=clf2.predict(pd.DataFrame.from_dict({
 }))
 print(pred)
 
-#split into function
+defn = {'predictors':predictors, 'outcome':outcome }
+insert_model(s1, defn,29,engine)
 #store in db
+
