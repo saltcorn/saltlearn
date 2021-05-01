@@ -3,11 +3,13 @@ CREATE or replace FUNCTION predict_Product_price (xs "Product", model_id integer
 AS $$
   import pickle
   import pandas
-  rv = plpy.execute("SELECT fitdump FROM _sl_models where id = {0}".format(model_id), 1)
+  import json
+  rv = plpy.execute("SELECT fitdump, definition FROM _sl_models where id = {0}".format(model_id), 1)
   clf2 = pickle.loads(rv[0]["fitdump"])
-  pred=clf2.predict(pandas.DataFrame.from_dict({
-    'category': [xs["category"]],
-    'pricep2':[xs["pricep2"]]
-  }))
+  ddict = {}
+  defn = json.loads(rv[0]["definition"])
+  for pred in defn['predictors']:
+    ddict[pred['name']] = [xs[pred['name']]]
+  pred=clf2.predict(pandas.DataFrame.from_dict(ddict))
   return pred[0]
 $$ LANGUAGE plpython3u;
