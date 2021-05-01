@@ -9,8 +9,6 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 
-print(get_db_uri())
-
 engine = create_engine(get_db_uri())
 
 predictors=[{'name':'category', 'type':{"name":"String"}},
@@ -32,5 +30,6 @@ print(pred)
 
 defn = {'predictors':predictors, 'outcome':outcome }
 insert_model(s1, defn,29,engine)
-#store in db
+
+# run in db
 
