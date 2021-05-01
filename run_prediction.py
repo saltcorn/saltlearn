@@ -12,5 +12,5 @@ from sklearn.pipeline import Pipeline
 
 engine = create_engine(get_db_uri())
 conn = engine.connect()
-result = conn.execute('select 1;').fetchall()
+result = conn.execute('select predict_Product_price("Product".*, 1), "Product".* from "Product" limit 10;').fetchall()
 print(result)
