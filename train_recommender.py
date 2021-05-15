@@ -1,20 +1,25 @@
 from server.config import get_db_uri
 
 from sqlalchemy import create_engine
-from surprise import NormalPredictor
-from surprise import Dataset
-from surprise import Reader
-from surprise.model_selection import cross_validate
 
-import pandas
+import pandas as pd
 import numpy as np
 
 engine = create_engine(get_db_uri())
 
-df = pandas.read_sql_query('SELECT * FROM "ProductLike"', con=engine)
-df = df[df.sessionid.notnull()]
-df['rating'] = 1
-reader = Reader(rating_scale=(0, 1))
-data = Dataset.load_from_df(df[['sessionid', 'product', 'rating']], reader)
-res=cross_validate(NormalPredictor(), data, cv=2)
-print(res)
+sql = """
+SELECT q.*, p.id as product_id , pl.id is not null as like_id 
+  FROM  questionnaire q cross join 
+        "Product" p left JOIN
+        "ProductLike" pl on 
+    pl.sessionid = q.sessionid and
+    pl.product = p.id """
+
+df = pd.read_sql_query(sql, con=engine)
+print(df)
+print(df.like_id.unique())
+#print(pd.get_dummies(df, columns=["homealoneweekday", "idealholiday", "idealsaturday", "ideal_sunday"]))
+
+#what about the ones they didnt like?
+
+#print(res) 
