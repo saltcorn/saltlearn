@@ -4,22 +4,34 @@ from sqlalchemy import create_engine
 
 import pandas as pd
 import numpy as np
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
+
 
 engine = create_engine(get_db_uri())
 
 sql = """
-SELECT q.*, p.id as product_id , pl.id is not null as like_id 
+SELECT q.*, p.id as product_id , pl.id is not null as liked 
   FROM  questionnaire q cross join 
         "Product" p left JOIN
         "ProductLike" pl on 
     pl.sessionid = q.sessionid and
     pl.product = p.id """
-
+preds=['wholookingfor','whatweartowork', 'ideal_sunday', 'idealsaturday','idealholiday','homealoneweekday','product_id' ]
 df = pd.read_sql_query(sql, con=engine)
-print(df)
-print(df.like_id.unique())
-#print(pd.get_dummies(df, columns=["homealoneweekday", "idealholiday", "idealsaturday", "ideal_sunday"]))
+df_y = df['liked']
+df_x = df[preds]
 
-#what about the ones they didnt like?
+print(df_x)
 
-#print(res) 
+preprocessor = ColumnTransformer(
+        transformers=[            
+            ('cat', OneHotEncoder(handle_unknown='ignore'), preds)])
+
+clf = Pipeline(steps=[('preprocessor', preprocessor),
+                      ('classifier', MLPClassifier())])
+
+
+clf.fit(df_x, df_y)
