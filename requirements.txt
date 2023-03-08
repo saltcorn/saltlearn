@@ -1,7 +1,7 @@
 Flask==1.1.2
 Flask-SQLAlchemy==2.5.1
 config-path==1.0.2
-SQLAlchemy>=1.4.10
+SQLAlchemy>=1.4.10,<2.0
 psycopg2-binary>=2.8.6
 pandas>=1.2.4
 scikit-surprise>=1.1.1
